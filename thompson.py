@@ -198,21 +198,34 @@ warnings.warn('remember to put in the actual uncertainty of the current source (
 warnings.warn('remember to calculate the current coming through a single coil; do the circuit laws')
 
 #B1 = unumpy.uarray()
-#B2 = unumpy.uarray()
-#B3 = unumpy.uarray()
+B2 = unumpy.uarray((
+        # runs 4 and 5
+        [0.18, 0.23, 0.39, 0.55, 0.74, 0.95, 1.19, 1.22],
+        [0.18, 0.30, 0.45, 0.64, 0.89, 1.16, 1.43, 1.80]
+    ), 0.05) * ureg.centimeter
+B3 = unumpy.uarray(
+        (
+            [0.02, 0.06, 0.11, 0.17, 0.20, 0.35, 0.33, 0.38],
+            [0.04, 0.15, 0.20, 0.26, 0.38, 0.48, 0.59, 0.72],
+            [0.12, 0.19, 0.28, 0.40, 0.56, 0.70, 0.83, 1.03],
+            [0.18, 0.23, 0.39, 0.55, 0.71, 0.92, 1.17, 1.43],
+            [0.19, 0.32, 0.46, 0.65, 0.90, 1.17, 1.43, 1.81],
+            ), 0.05
+        ) * ureg.centimeter
 
 # populate the dataclass with the magnetic field data
-#for run in itertools.product((BI,), (B1, B2, B3)):
-#    for I, y_values in zip(run[0], run[1]):
-#        all_data.magnetic_field_trials.append(
-#                BFieldOnly(
-#                    current=I,
-#                    horizontal_beam_points=horizontal_sample_coords,
-#                    vertical_beam_points=y_values,
-#                    )
-#                )
+for run in itertools.product((BI,), (B1, B2, B3)):
+    for I, y_values in zip(run[0], run[1]):
+        all_data.magnetic_field_trials.append(
+                BFieldOnly(
+                    current=I,
+                    horizontal_beam_points=horizontal_sample_coords,
+                    vertical_beam_points=y_values,
+                    )
+                )
 
 # === Null deflection ===
+# Cancelled due to power supply safety concerns.
 
 # y-values of electron beam deflected only by E field, before B field applied
 #EB1 = unumpy.uarray()
@@ -265,25 +278,25 @@ for i, _ in enumerate(all_data.magnetic_field_trials):
     )
     B_cmr_results.append(calculated_cmr)
 
-for i, _ in enumerate(all_data.cancellation_trials):
-    fit = quadratic_regression(
-        [
-            y.nominal_value
-            for y in all_data.magnetic_field_trials[i].vertical_beam_points
-        ],
-        all_data.magnetic_field_trials[i].horizontal_beam_points,
-    ).fit()
-    calculated_cmr = EB_cmr_expression.subs(
-        {
-            "mu_0": scipy.constants.mu_0,
-            "N": all_data.coil_turns,
-            "I": all_data.cancellation_trials[i].current,
-            "C": fit.params[0],
-            "R": all_data.coil_radius,
-            "V_ac": all_data.accel_voltage,
-        }
-    )
-    EB_cmr_results.append(calculated_cmr)
+#for i, _ in enumerate(all_data.cancellation_trials):
+#    fit = quadratic_regression(
+#        [
+#            y.nominal_value
+#            for y in all_data.magnetic_field_trials[i].vertical_beam_points
+#        ],
+#        all_data.magnetic_field_trials[i].horizontal_beam_points,
+#    ).fit()
+#    calculated_cmr = EB_cmr_expression.subs(
+#        {
+#            "mu_0": scipy.constants.mu_0,
+#            "N": all_data.coil_turns,
+#            "I": all_data.cancellation_trials[i].current,
+#            "C": fit.params[0],
+#            "R": all_data.coil_radius,
+#            "V_ac": all_data.accel_voltage,
+#        }
+#    )
+#    EB_cmr_results.append(calculated_cmr)
 
 if __name__ == "__main__":
     # prelab
@@ -313,8 +326,8 @@ if __name__ == "__main__":
     (5) {I1} A
     """
 
-    for reg in regressions:
-        print(reg.rsquared_adj)
+    #for reg in regressions:
+    #    print(reg.rsquared_adj)
     #print(PRELAB_RESULTS)
     #print(
     #    f"""
