@@ -197,7 +197,19 @@ BI = unumpy.uarray(numpy.arange(0.04, 0.24, 0.04), 0.01)
 warnings.warn('remember to put in the actual uncertainty of the current source (probably in the datasheet somewhere)')
 warnings.warn('remember to calculate the current coming through a single coil; do the circuit laws')
 
-#B1 = unumpy.uarray()
+B1 = unumpy.uarray(
+    (
+        [0.04, 0.09, 0.11, 0.16, 0.21, 0.26, 0.30, 0.38],
+        [0.08, 0.16, 0.20, 0.28, 0.38, 0.49, 0.60, 0.71],
+        [0.11, 0.20, 0.29, 0.41, 0.52, 0.69, 0.88, 1.08],
+        [0.14, 0.26, 0.39, 0.53, 0.71, 0.91, 1.14, 1.42],
+        [0.18, 0.30, 0.46, 0.66, 0.89, 1.15, 1.45, 1.79],
+    ),
+     0.05,
+) * ureg.cm
+         
+        
+)
 #B2 = unumpy.uarray()
 #B3 = unumpy.uarray()
 
