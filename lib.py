@@ -1,11 +1,11 @@
+import uncertainties.core
+import numpy
+
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from numpy import ndarray
 from statsmodels.regression.linear_model import OLS
 from sympy import parse_expr, symbols, sqrt, Symbol, Expr
-from pint import Quantity
-from uncertainties.core import Variable
-from numpy import ndarray
-import numpy
 
 @dataclass
 class ElectronBeamData:
@@ -18,8 +18,8 @@ class ElectronBeamData:
             measured vertical coordinates of points on the beam.
     """
 
-    horizontal_beam_points: ndarray[Quantity[Variable]]
-    vertical_beam_points: ndarray[Quantity[Variable]]
+    horizontal_beam_points: ndarray
+    vertical_beam_points: ndarray
 
 
 @dataclass
@@ -32,7 +32,7 @@ class EFieldOnly(ElectronBeamData):
             above and below the flourescent screen.
     """
 
-    deflection_voltage: Quantity[Variable]
+    deflection_voltage: uncertainties.core.Variable
 
 
 @dataclass
@@ -44,7 +44,7 @@ class BFieldOnly(ElectronBeamData):
             current as read from the power supply sent to the Helmholtz coils.
     """
 
-    current: Quantity[Variable]
+    current: uncertainties.core.Variable
 
 
 @dataclass
@@ -78,11 +78,11 @@ class ChargeMassRatioMeasurements:
         magnetic_field_trials:
     """
 
-    accel_voltage: Quantity[Variable]
+    accel_voltage: uncertainties.core.Variable
     coil_turns: int
-    coil_radius: Quantity[Variable]
-    coil_separation: Quantity[Variable]
-    deflection_plate_separation: Quantity[Variable]
+    coil_radius: uncertainties.core.Variable
+    coil_separation: uncertainties.core.Variable
+    deflection_plate_separation: uncertainties.core.Variable
     electric_field_trials: list[EFieldOnly] = field(default_factory=list)
     magnetic_field_trials: list[BFieldOnly] = field(default_factory=list)
     cancellation_trials: list[EBCancellation] = field(default_factory=list)
