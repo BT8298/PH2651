@@ -219,7 +219,7 @@ for i, _ in enumerate(all_data.magnetic_field_trials):
     )
     B_cmr_results.append(calculated_cmr)
 
-# uncertainties package doesn't play nice with some third party packages
+# numpy.std doesn't work on an array of uncertainties.core.Variable
 B_cmr_results_no_uncertainty = [cmr.nominal_value for cmr in B_cmr_results]
 print("Charge to mass ratio results from B field only:\n")
 for i, cmr in enumerate(B_cmr_results):
@@ -240,8 +240,8 @@ Fixed measurements:
 
 Descriptive statistics for calculated e/m ratios:
     number of observations: {len(B_cmr_results)}
-    median: {numpy.median(B_cmr_results_no_uncertainty):e}
-    mean: {numpy.mean(B_cmr_results_no_uncertainty):e}
+    median: {numpy.median(B_cmr_results):e}
+    mean: {numpy.mean(B_cmr_results):e}
     standard deviation: {numpy.std(B_cmr_results_no_uncertainty, ddof=1):e}
 
 Statistical tests for calculated e/m ratio set:
@@ -256,15 +256,14 @@ Statistics for regression models:
 )
 
 # boxplot of e/m results
-fig, axss = plt.subplots(2, layout='constrained')
-axss[0].boxplot(B_cmr_results_no_uncertainty, orientation="horizontal")
-axss[1].boxplot(B_cmr_results_no_uncertainty, orientation="horizontal", showfliers=False)
-for axs in axss:
-    axs.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
-    axs.set_xlabel('electron charge to mass quotient (C kg^-1)')
-    axs.set_frame_on(False)
-    axs.set_yticks([])
-plt.savefig("B_boxplot.svg")
+
+fig, ax = plt.subplots()
+ax.boxplot(B_cmr_results_no_uncertainty, orientation="horizontal")
+ax.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
+ax.set_xlabel('electron charge to mass quotient (C kg^-1)')
+ax.set_frame_on(False)
+ax.set_yticks([])
+fig.savefig("B_boxplot.svg")
 plt.close()
 
 # plot of all regressions for beam shapes under B field only
