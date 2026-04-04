@@ -137,7 +137,6 @@ B1 = (
 B2 = (
     unumpy.uarray(
         (
-            [
             # runs 4 and 5
             [0.17, 0.23, 0.39, 0.55, 0.74, 0.95, 1.19, 1.42],
             [0.19, 0.30, 0.45, 0.64, 0.89, 1.17, 1.43, 1.80],
@@ -218,109 +217,130 @@ for i, _ in enumerate(all_data.magnetic_field_trials):
     )
     B_cmr_results.append(calculated_cmr)
 
-if __name__ == "__main__":
-    # uncertainties package doesn't play nice with some third party packages
-    B_cmr_results_no_uncertainty = [cmr.nominal_value for cmr in B_cmr_results]
-    print("Charge to mass ratio results from B field only:")
-    for i, cmr in enumerate(B_cmr_results):
-        print(
-            "trial:",
-            i + 1,
-            "e/m:",
-            cmr,
-            "ratio to accepted value:",
-            cmr / cmr_accepted_value[0],
-        )
-
+# uncertainties package doesn't play nice with some third party packages
+B_cmr_results_no_uncertainty = [cmr.nominal_value for cmr in B_cmr_results]
+print("Charge to mass ratio results from B field only:\n")
+for i, cmr in enumerate(B_cmr_results):
     print(
-        f"""
-    Fixed measurements:
-        Coil radius: {all_data.coil_radius}
-        Coil turns: {all_data.coil_turns}
-        Coil separation: {all_data.coil_separation}
-        Deflection plate separation: {all_data.deflection_plate_separation}
-
-    Descriptive statistics for calculated e/m ratios:
-        number of observations: {len(B_cmr_results)}
-        median: {numpy.median(B_cmr_results_no_uncertainty):e}
-        mean: {numpy.mean(B_cmr_results_no_uncertainty):e}
-        standard deviation: {numpy.std(B_cmr_results_no_uncertainty, ddof=1):e}
-    
-    Statistical tests for calculated e/m ratio set:
-        Lilliefors normality test (p value): {statsmodels.stats.diagnostic.lilliefors(B_cmr_results_no_uncertainty)[1]}
-        Jarque-Bera normality test (p value): {statsmodels.stats.stattools.jarque_bera(B_cmr_results_no_uncertainty)[1]}
-        Shapiro-Wilk normality test (p value): {scipy.stats.shapiro(B_cmr_results_no_uncertainty)[1]}
-
-    Statistics for regression models:
-    """
-        # pprint.pprint(scipy.stats.describe([cmr.nominal_value for cmr in B_cmr_results]))
+        "trial",
+        i + 1,
+        "e/m:",
+        cmr,
     )
 
-    # plot of all regressions for beam shapes under B field only
-    axs = plt.axes()
-    _fit_plot_sample_pts = numpy.linspace(0.025, 0.095, 20)
-    for run, fit in zip(all_data.magnetic_field_trials, B_regressions):
-        z_values = run.horizontal_beam_points
-        y_values = run.vertical_beam_points
-        axs.set_title(
-            f"Electron Trajectory in a Paired Helmholtz Coil Magnetic Fields with Quadratic Fit ({len(all_data.magnetic_field_trials)} trials)",
-            loc="center",
-            wrap=True,
-        )
-        axs.set_xlabel("z (cm)")
-        axs.set_ylabel("y (cm)")
-        axs.grid(visible=True)
-        axs.set_xticks(z_values)
-        plt.grid(visible=True)
-        axs.errorbar(
-            z_values,
-            [y.nominal_value for y in y_values],
-            yerr=[y.std_dev for y in y_values],
-            elinewidth=1,
-            capsize=2,
-            linestyle="none",
-            marker="o",
-            markersize=3,
-        )
-        axs.plot(
-            _fit_plot_sample_pts,
-            fit.params[0] * _fit_plot_sample_pts**2
-            + fit.params[1] * _fit_plot_sample_pts
-            + fit.params[2],
-            "k--",
-            linewidth=1,
-        )
-        # plt.savefig(f"B_run{i}.svg")
-        # plt.show(block=False)
-        i = i + 1
-    plt.savefig("B_all.svg")
+print(
+    f"""
+Fixed measurements:
+    Coil radius: {all_data.coil_radius}
+    Coil turns: {all_data.coil_turns}
+    Coil separation: {all_data.coil_separation}
+    Deflection plate separation: {all_data.deflection_plate_separation}
 
-    # i = 1
-    # axs = plt.axes()
-    # _fit_plot_sample_pts = numpy.linspace(0.025,0.095,20)
-    # for y_values, fit in zip(all_data.magnetic_field_trials, B_regressions):
-    #    #if i in {6,7,8}:
-    #    #axs = plt.axes()
-    #    #plt.title(f"B field run {i}")
-    #    plt.title("B field all runs")
-    #    plt.grid(visible=True)
-    #    axs.scatter(y_values.horizontal_beam_points.magnitude, [y.magnitude.nominal_value for y in y_values.vertical_beam_points])
-    #    #_pts = numpy.linspace(0.025,0.095,20)
-    #    axs.plot(_fit_plot_sample_pts, fit.params[0]*_fit_plot_sample_pts**2 + fit.params[1]*_fit_plot_sample_pts + fit.params[2], 'k--')
-    #    #plt.savefig(f"B_run{i}.svg")
-    #    #plt.show(block=False)
-    #    i=i+1
-    # plt.show()
+Descriptive statistics for calculated e/m ratios:
+    number of observations: {len(B_cmr_results)}
+    median: {numpy.median(B_cmr_results_no_uncertainty):e}
+    mean: {numpy.mean(B_cmr_results_no_uncertainty):e}
+    standard deviation: {numpy.std(B_cmr_results_no_uncertainty, ddof=1):e}
 
-    # prelab
-    # mu_0, N, I, R, V, B = sympy.symbols("mu_0 N I R V B")
-    # sp1 = sympy.sqrt(
-    #    2 * 2000 * const.physical_constants["electron charge to mass quotient"][0]
-    # )
-    # sp2 = sympy.sqrt(
-    #    2 * 2500 * const.physical_constants["electron charge to mass quotient"][0]
-    # )
-    # spt = sympy.sqrt(3 * const.k * 300 / const.m_e)
-    # sph = sympy.sqrt(2 * (13.6 * 1.602176634e-19) / const.m_e)
-    # B1 = (const.m_e * sp1) / (const.e * 20e-2)
-    # I1 = ((B1 * R) / (const.mu_0 * N) * (5 / 4) ** (3 / 2)).subs({R: 6e-2, N: 320})
+Statistical tests for calculated e/m ratio set:
+    Lilliefors normality test (p value): {statsmodels.stats.diagnostic.lilliefors(B_cmr_results_no_uncertainty)[1]}
+    Jarque-Bera normality test (p value): {statsmodels.stats.stattools.jarque_bera(B_cmr_results_no_uncertainty)[1]}
+    Shapiro-Wilk normality test (p value): {scipy.stats.shapiro(B_cmr_results_no_uncertainty)[1]}
+    Two-sided one-sample t test (p value): {scipy.stats.ttest_1samp(B_cmr_results_no_uncertainty, cmr_accepted_value[0], alternative="two-sided")[1]}
+
+Statistics for regression models:
+"""
+    # pprint.pprint(scipy.stats.describe([cmr.nominal_value for cmr in B_cmr_results]))
+)
+
+# boxplot of e/m results
+fig, axss = plt.subplots(2, layout='constrained')
+axss[0].boxplot(B_cmr_results_no_uncertainty, orientation="horizontal")
+axss[1].boxplot(B_cmr_results_no_uncertainty, orientation="horizontal", showfliers=False)
+for axs in axss:
+    axs.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
+    axs.set_xlabel('electron charge to mass quotient (C kg^-1)')
+    axs.set_frame_on(False)
+    axs.set_yticks([])
+plt.savefig("B_boxplot.svg")
+plt.close()
+
+# plot of all regressions for beam shapes under B field only
+axs = plt.axes()
+_fit_plot_sample_pts = numpy.linspace(0.025, 0.095, 20)
+for run, fit in zip(all_data.magnetic_field_trials, B_regressions):
+    z_values = run.horizontal_beam_points
+    y_values = run.vertical_beam_points
+    axs.set_title(
+        f"Electron Trajectory in Paired Helmholtz Coil Magnetic Fields with Parabolic Fit ({len(all_data.magnetic_field_trials)} trials)",
+        loc="center",
+        wrap=True,
+    )
+    axs.set_xlabel("z (cm)")
+    axs.set_ylabel("y (cm)")
+    axs.grid(visible=True)
+    axs.set_xticks(z_values)
+    plt.grid(visible=True)
+    axs.errorbar(
+        z_values,
+        [y.nominal_value for y in y_values],
+        yerr=[y.std_dev for y in y_values],
+        elinewidth=1,
+        capsize=2,
+        linestyle="none",
+        marker="o",
+        markersize=3,
+    )
+    axs.plot(
+        _fit_plot_sample_pts,
+        fit.params[0] * _fit_plot_sample_pts**2
+        + fit.params[1] * _fit_plot_sample_pts
+        + fit.params[2],
+        "k--",
+        linewidth=1,
+    )
+    # plt.savefig(f"B_run{i}.svg")
+    # plt.show(block=False)
+    i = i + 1
+plt.savefig("B_all.svg")
+plt.close()
+
+# residual plots for each regression
+for i, (run, fit) in enumerate(zip(all_data.magnetic_field_trials, B_regressions)):
+    z_values = run.horizontal_beam_points
+    plt.scatter(z_values, fit.resid)
+    plt.title(f"Residual Plot for B Trial {i+1}")
+    plt.xlabel('z (cm)')
+    plt.ylabel('residual (cm)')
+    plt.savefig(f"B_resids_{i+1}.svg")
+    plt.close()
+
+# i = 1
+# axs = plt.axes()
+# _fit_plot_sample_pts = numpy.linspace(0.025,0.095,20)
+# for y_values, fit in zip(all_data.magnetic_field_trials, B_regressions):
+#    #if i in {6,7,8}:
+#    #axs = plt.axes()
+#    #plt.title(f"B field run {i}")
+#    plt.title("B field all runs")
+#    plt.grid(visible=True)
+#    axs.scatter(y_values.horizontal_beam_points.magnitude, [y.magnitude.nominal_value for y in y_values.vertical_beam_points])
+#    #_pts = numpy.linspace(0.025,0.095,20)
+#    axs.plot(_fit_plot_sample_pts, fit.params[0]*_fit_plot_sample_pts**2 + fit.params[1]*_fit_plot_sample_pts + fit.params[2], 'k--')
+#    #plt.savefig(f"B_run{i}.svg")
+#    #plt.show(block=False)
+#    i=i+1
+# plt.show()
+
+# prelab
+# mu_0, N, I, R, V, B = sympy.symbols("mu_0 N I R V B")
+# sp1 = sympy.sqrt(
+#    2 * 2000 * const.physical_constants["electron charge to mass quotient"][0]
+# )
+# sp2 = sympy.sqrt(
+#    2 * 2500 * const.physical_constants["electron charge to mass quotient"][0]
+# )
+# spt = sympy.sqrt(3 * const.k * 300 / const.m_e)
+# sph = sympy.sqrt(2 * (13.6 * 1.602176634e-19) / const.m_e)
+# B1 = (const.m_e * sp1) / (const.e * 20e-2)
+# I1 = ((B1 * R) / (const.mu_0 * N) * (5 / 4) ** (3 / 2)).subs({R: 6e-2, N: 320})
