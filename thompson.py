@@ -258,11 +258,12 @@ Statistics for regression models:
 # boxplot of e/m results
 
 fig, ax = plt.subplots()
-ax.boxplot(B_cmr_results_no_uncertainty, orientation="horizontal")
+ax.boxplot(B_cmr_results_no_uncertainty, orientation="horizontal", positions=(0,), widths=(1,))
 ax.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
 ax.set_xlabel('electron charge to mass quotient (C kg^-1)')
 ax.set_frame_on(False)
 ax.set_yticks([])
+ax.set_ylim(-0.6, 0.6)
 fig.savefig("B_boxplot.svg")
 plt.close()
 
@@ -307,41 +308,11 @@ plt.savefig("B_all.svg")
 plt.close()
 
 # residual plots for each regression
-for i, (run, fit) in enumerate(zip(all_data.magnetic_field_trials, B_regressions)):
-    z_values = run.horizontal_beam_points
-    plt.scatter(z_values, fit.resid)
-    plt.title(f"Residual Plot for B Trial {i+1}")
-    plt.xlabel('z (cm)')
-    plt.ylabel('residual (cm)')
-    plt.savefig(f"B_resids_{i+1}.svg")
-    plt.close()
-
-# i = 1
-# axs = plt.axes()
-# _fit_plot_sample_pts = numpy.linspace(0.025,0.095,20)
-# for y_values, fit in zip(all_data.magnetic_field_trials, B_regressions):
-#    #if i in {6,7,8}:
-#    #axs = plt.axes()
-#    #plt.title(f"B field run {i}")
-#    plt.title("B field all runs")
-#    plt.grid(visible=True)
-#    axs.scatter(y_values.horizontal_beam_points.magnitude, [y.magnitude.nominal_value for y in y_values.vertical_beam_points])
-#    #_pts = numpy.linspace(0.025,0.095,20)
-#    axs.plot(_fit_plot_sample_pts, fit.params[0]*_fit_plot_sample_pts**2 + fit.params[1]*_fit_plot_sample_pts + fit.params[2], 'k--')
-#    #plt.savefig(f"B_run{i}.svg")
-#    #plt.show(block=False)
-#    i=i+1
-# plt.show()
-
-# prelab
-# mu_0, N, I, R, V, B = sympy.symbols("mu_0 N I R V B")
-# sp1 = sympy.sqrt(
-#    2 * 2000 * const.physical_constants["electron charge to mass quotient"][0]
-# )
-# sp2 = sympy.sqrt(
-#    2 * 2500 * const.physical_constants["electron charge to mass quotient"][0]
-# )
-# spt = sympy.sqrt(3 * const.k * 300 / const.m_e)
-# sph = sympy.sqrt(2 * (13.6 * 1.602176634e-19) / const.m_e)
-# B1 = (const.m_e * sp1) / (const.e * 20e-2)
-# I1 = ((B1 * R) / (const.mu_0 * N) * (5 / 4) ** (3 / 2)).subs({R: 6e-2, N: 320})
+#for i, (run, fit) in enumerate(zip(all_data.magnetic_field_trials, B_regressions)):
+#    z_values = run.horizontal_beam_points
+#    plt.scatter(z_values, fit.resid)
+#    plt.title(f"Residual Plot for B Trial {i+1}")
+#    plt.xlabel('z (cm)')
+#    plt.ylabel('residual (cm)')
+#    plt.savefig(f"B_resids_{i+1}.svg")
+#    plt.close()
