@@ -10,3 +10,6 @@ dependencies = [
     "sympy>=1.14.0",
     "uncertainties>=3.2.3",
 ]
+
+[tool.ruff]
+line-length = 80
