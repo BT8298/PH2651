@@ -26,7 +26,6 @@ if __name__ == "__main__":
     our_cesium_source = lib.CheckSource(
         element="Cs",
         mass_number=137,
-        # years to seconds
         half_life=ufloat(30.007, 0.00046),
         assay_date=datetime.datetime.today(),
         record_date=datetime.datetime.today(),
@@ -44,7 +43,6 @@ if __name__ == "__main__":
     our_barium_source = lib.CheckSource(
         element="Ba",
         mass_number=133,
-        # years to seconds
         half_life=ufloat(10.536, 0.0008),
         assay_date=datetime.datetime.today(),
         record_date=datetime.datetime.today(),
@@ -61,7 +59,6 @@ if __name__ == "__main__":
     our_cobalt_source = lib.CheckSource(
         element="Co",
         mass_number=60,
-        # years to seconds
         half_life=ufloat(5.271, 0.0002),
         assay_date=datetime.datetime.today(),
         record_date=datetime.datetime.today(),
@@ -82,7 +79,6 @@ if __name__ == "__main__":
     our_sodium_source = lib.CheckSource(
         element="Na",
         mass_number=22,
-        # years to seconds
         half_life=ufloat(2.6019, 0.00005),
         assay_date=datetime.datetime.today(),
         record_date=datetime.datetime.today(),
@@ -111,8 +107,6 @@ if __name__ == "__main__":
     for path in argns.spectrum_files:
         with open(path, "rt", newline="") as spectrum:
             data.pulse_height_analyses.append(lib.parse_prospect_csv(spectrum))
-
-    breakpoint()
 
     # TODO efficiency calculation
     #energies = ()
