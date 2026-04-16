@@ -6,6 +6,7 @@
 import math
 import itertools
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import scipy.constants as const
@@ -40,7 +41,13 @@ horizontal_sample_coords = numpy.arange(2.5, 10.5, 1) * 1e-2  # cm to m
 # we measured it to be 4 and 3/4 inches, with 1/8 inch markings
 arc = ufloat(4 + 3 / 4, 1 / 16) * 0.0254  # in. to m
 all_data = lib.ChargeMassRatioMeasurements(
-    accel_voltage=ufloat(1, 0.05) * 1e3,  # kV to V
+    # When we briefly verified the high voltage power supply's reading using an
+    # external voltmeter, we found the external meter reports roughly 1.2kV
+    # when the power supply needle is on 1kV. So we add 0.2kV to the
+    # accel_voltage under the assumption that the external voltmeter is more
+    # accurate. It shifts the mean observed closer to the accepted value.
+    accel_voltage=ufloat(1.2, 0.05) * 1e3,  # kV to V
+    #accel_voltage=ufloat(1, 0.05) * 1e3,  # kV to V
     deflection_plate_separation=ufloat(5.28, 0.05) * 1e-2,  # cm to m
     coil_turns=320,
     coil_radius=2 * arc / math.pi,
@@ -257,13 +264,16 @@ Statistics for regression models:
 
 # boxplot of e/m results
 
-fig, ax = plt.subplots()
+plt.rcParams.update({'font.size': 16})
+
+fig, ax = plt.subplots(layout='constrained')
 ax.boxplot(B_cmr_results_no_uncertainty, orientation="horizontal", positions=(0,), widths=(1,))
 ax.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
-ax.set_xlabel('electron charge to mass quotient (C kg^-1)')
+ax.set_xlabel('electron charge to mass quotient (C kg^-1)', wrap=True)
 ax.set_frame_on(False)
 ax.set_yticks([])
 ax.set_ylim(-0.6, 0.6)
+ax.xaxis.set_units('C kg^-1')
 fig.savefig("B_boxplot.svg")
 plt.close()
 
