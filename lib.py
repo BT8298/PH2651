@@ -145,7 +145,7 @@ class CheckSource:
     assay_date: datetime.datetime
     record_date: datetime.datetime
     initial_activity: float
-    characteristic_gammas: frozenset[CharacteristicGamma]
+    characteristic_gammas: tuple[CharacteristicGamma, ...]
 
 
 @dataclass
