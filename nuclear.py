@@ -10,6 +10,13 @@ import numpy as np
 
 from uncertainties import ufloat, unumpy
 
+calculated_activities = {
+    'cesium': 2.013818656,
+    'cobalt': 0.1655648803,
+    'barium': 2.369344055,
+    'sodium': 33.6581521,
+}
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--spectrum-files", nargs="+")
@@ -27,7 +34,7 @@ if __name__ == "__main__":
         element="Cs",
         mass_number=137,
         half_life=ufloat(30.007, 0.00046),
-        assay_date=datetime.datetime.today(),
+        assay_date=datetime.datetime.(1995, 10, 13),
         record_date=datetime.datetime.today(),
         initial_activity=1,
         characteristic_gammas=frozenset(
@@ -44,7 +51,7 @@ if __name__ == "__main__":
         element="Ba",
         mass_number=133,
         half_life=ufloat(10.536, 0.0008),
-        assay_date=datetime.datetime.today(),
+        assay_date=datetime.datetime.(2013, 1,3),
         record_date=datetime.datetime.today(),
         initial_activity=1,
         characteristic_gammas=frozenset(
@@ -60,9 +67,9 @@ if __name__ == "__main__":
         element="Co",
         mass_number=60,
         half_life=ufloat(5.271, 0.0002),
-        assay_date=datetime.datetime.today(),
+        assay_date=datetime.datetime.(2013, 1, 1),
         record_date=datetime.datetime.today(),
-        initial_activity=1,
+        initial_activity=ufloat(0.988, 0.05*0.988),
         characteristic_gammas=frozenset(
             {
                 lib.CharacteristicGamma(
@@ -80,9 +87,9 @@ if __name__ == "__main__":
         element="Na",
         mass_number=22,
         half_life=ufloat(2.6019, 0.00005),
-        assay_date=datetime.datetime.today(),
+        assay_date=datetime.datetime.datetime(2013, 1, 1),
         record_date=datetime.datetime.today(),
-        initial_activity=1,
+        initial_activity=ufloat(0.984, 0.05*0.984), #microcurie
         characteristic_gammas=frozenset(
             {
                 lib.CharacteristicGamma(
