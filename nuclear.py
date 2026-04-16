@@ -36,7 +36,7 @@ if __name__ == "__main__":
         half_life=ufloat(30.007, 0.00046),
         assay_date=datetime.datetime.(1995, 10, 13),
         record_date=datetime.datetime.today(),
-        initial_activity=1,
+        initial_activity=ufloat(1, 0.20*1),
         characteristic_gammas=frozenset(
             {
                 lib.CharacteristicGamma(
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         half_life=ufloat(10.536, 0.0008),
         assay_date=datetime.datetime.(2013, 1,3),
         record_date=datetime.datetime.today(),
-        initial_activity=1,
+        initial_activity=ufloat(0.988, 0.05*0.988),
         characteristic_gammas=frozenset(
             {
                 lib.CharacteristicGamma(
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         half_life=ufloat(5.271, 0.0002),
         assay_date=datetime.datetime.(2013, 1, 1),
         record_date=datetime.datetime.today(),
-        initial_activity=ufloat(0.988, 0.05*0.988),
+        initial_activity=ufloat(0.949, 0.05*0.949),
         characteristic_gammas=frozenset(
             {
                 lib.CharacteristicGamma(
