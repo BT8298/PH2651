@@ -8,7 +8,7 @@ import uncertainties.umath as umath
 from datetime import datetime
 
 # 3% voltage accuracy per the manual
-detector_voltage=ufloat(900, 0.03 * 900),
+detector_voltage = (ufloat(900, 0.03 * 900),)
 # 5% live time correction accuracy per the manual
 # TODO not sure if this is the correct formula for 5% accuracy
 live_time = ufloat(120, 0.05 * 120)
@@ -39,7 +39,7 @@ check_source_properties = {
         ),
         # TODO
         # to be calculated in ProSpect software
-        "peak_counts": (1,1,1),
+        "peak_counts": (1, 1, 1),
     },
     "133Ba": {
         "half_life": ufloat(10.536, 0.0008),
@@ -65,7 +65,7 @@ check_source_properties = {
             0.6205,
         ),
         # TODO
-        "peak_counts": (1,1,1,1,1,1),
+        "peak_counts": (1, 1, 1, 1, 1, 1),
     },
     "60Co": {
         "half_life": ufloat(5.271, 0.0002),
@@ -83,7 +83,7 @@ check_source_properties = {
             ufloat(0.999826, 0.0000006),
         ),
         # TODO
-        "peak_counts": (1,1),
+        "peak_counts": (1, 1),
     },
     "22Na": {
         "half_life": ufloat(2.6019, 0.00005),
@@ -99,7 +99,7 @@ check_source_properties = {
             ufloat(0.99940, 0.0000014),
         ),
         # TODO
-        "peak_counts": (1,1),
+        "peak_counts": (1, 1),
     },
 }
 
@@ -126,6 +126,7 @@ for isotope in check_source_properties.keys():
         all_efficiencies.append(efficiency)
         all_energies.append(energy)
 
+
 def scrub_uncertainties(x):
     if isinstance(x, collections.abc.Sequence):
         scrubbed = []
@@ -137,6 +138,24 @@ def scrub_uncertainties(x):
         return scrubbed
     elif isinstance(x, uncertainties.core.UFloat):
         return x.nominal_value
+    else:
+        return x
+
+
+def get_uncertainties(x):
+    if isinstance(x, collections.abc.Sequence):
+        scrubbed = []
+        for i in x:
+            if isinstance(i, uncertainties.UFloat):
+                scrubbed.append(i.std_dev)
+            else:
+                scrubbed.append(0)
+        return scrubbed
+    elif isinstance(x, uncertainties.core.UFloat):
+        return x.std_dev
+    else:
+        return 0
+
 
 # efficiency curve fit model given by equation 11 in
 # https://doi.org/10.1016/j.jclepro.2024.143910. we do not apply the natural
@@ -148,15 +167,26 @@ def exp_log_poly(x, A, B, C, D):
     return np.exp(
         A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
     )
-fit = scipy.optimize.curve_fit(
-    #exp_log_poly,
+
+popt, _ = scipy.optimize.curve_fit(
+    # exp_log_poly,
     lambda x, A, B, C, D: np.exp(
-        A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
+       A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
     ),
+    #lambda x, A, B, C: A * x**2 + B * x + C,
     xdata=scrub_uncertainties(all_energies),
     ydata=scrub_uncertainties(all_efficiencies),
 )
 
-print('exp-log-poly fit parameters:', fit)
-with open('efficiency_datapoints.json', 'w') as file:
-    json.dump({'energy': all_energies, 'efficiency': all_efficiencies}, file)
+with open("efficiency_datapoints.json", "w") as file:
+    json.dump(
+        {
+            "energy": scrub_uncertainties(all_energies),
+            "efficiency": scrub_uncertainties(all_efficiencies),
+            "energy_uncertainty": get_uncertainties(all_energies),
+            "efficiency_uncertainty": get_uncertainties(all_efficiencies),
+            #"log_poly_fit_params": {'A': popt[0], 'B': popt[1], 'C': popt[2], 'D': popt[3]}
+        },
+        file,
+    )
+
