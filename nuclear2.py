@@ -7,6 +7,11 @@ from uncertainties import ufloat
 import uncertainties.umath as umath
 from datetime import datetime
 
+# Friday
+# cs 137: 661.657, 96532 counts, 120s live, 804.43 c/s
+# co 60: 1173.228, 23310, 194.25; 1332.492, 16566, 138.05
+# eu 152: 121.7817, 98512, 820.93;
+
 # 3% voltage accuracy per the manual
 detector_voltage = (ufloat(900, 0.03 * 900),)
 # 5% live time correction accuracy per the manual
@@ -21,59 +26,35 @@ check_source_properties = {
         "half_life": ufloat(30.007, 0.00046),
         # we assume time uncertainty is neglibile, since these sources have been decaying for years
         "assay_date": datetime(1995, 10, 13),
-        # TODO
-        "calibration_date": datetime.today(),
-        # TODO and uncertainty
-        "initial_activity": 1 * 1e-6 * 3.7e10,
+        "calibration_date": datetime(2026, 4, 17),
+        # microCurie to Becquerel
+        "initial_activity": ufloat(1.0, 0.2 * 1.0) * 1e-6 * 3.7e10,
         # some energies have no listed uncertainty on www.nndc.bnl.gov/nudat3
         # all energies are in keV
-        "energies": (
-            31.817,
-            32.194,
-            ufloat(661.657, 0.0003),
-        ),
-        "intensities": (
-            ufloat(0.0199, 0.00005),
-            ufloat(0.0364, 0.00001),
-            ufloat(0.8510, 0.00020),
-        ),
-        # TODO
-        # to be calculated in ProSpect software
-        "peak_counts": (1, 1, 1),
+        "energies": (ufloat(661.657, 0.0003),),
+        "intensities": (ufloat(0.8510, 0.00020),),
+        # as reported by ProSpect. raw values, not subtracted from noise floor
+        "peak_counts": (96532,),
+        # forgot to record uncertainty
+        "peak_counts_per_second": (804.43,),
     },
-    "133Ba": {
-        "half_life": ufloat(10.536, 0.0008),
+    "152Eu": {
+        "half_life": ufloat(13.517, 0.0009),
         "assay_date": datetime(2013, 1, 3),
-        # TODO
-        "calibration_date": datetime.today(),
-        # TODO
-        "initial_activity": 1 * 1e-6 * 3.7e10,
-        "energies": (
-            4.29,
-            30.625,
-            30.973,
-            ufloat(80.9979, 0.000011),
-            ufloat(302.8508, 0.00005),
-            ufloat(356.0129, 0.00007),
-        ),
-        "intensities": (
-            ufloat(0.157, 0.0008),
-            ufloat(0.339, 0.0001),
-            ufloat(0.622, 0.00018),
-            ufloat(0.329, 0.0003),
-            ufloat(0.1834, 0.000013),
-            0.6205,
-        ),
-        # TODO
-        "peak_counts": (1, 1, 1, 1, 1, 1),
+        "calibration_date": datetime(2026, 4, 17),
+        # TODO uncertainty is 20% or 5%?
+        "initial_activity": ufloat(1.02, 0.20) * 1e-6 * 3.7e10,
+        "energies": (ufloat(121.7817, 0.00003),),
+        "intensities": (ufloat(0.2853, 0.000016),),
+        "peak_counts": (98512,),
+        "peak_counts_per_second": (820.93,),
     },
     "60Co": {
         "half_life": ufloat(5.271, 0.0002),
         "assay_date": datetime(2013, 1, 1),
-        # TODO
-        "calibration_date": datetime.today(),
-        # NIST traceable, 5% uncertainty, microcuries Bq
-        "initial_activity": ufloat(0.988, 0.05 * 0.988) * 1e-6 * 3.7e10,
+        "calibration_date": datetime(2026, 4, 17),
+        # NIST traceable, 5% uncertainty
+        "initial_activity": ufloat(0.949, 0.05 * 0.949) * 1e-6 * 3.7e10,
         "energies": (
             ufloat(1173.228, 0.0003),
             ufloat(1332.492, 0.0004),
@@ -82,25 +63,47 @@ check_source_properties = {
             ufloat(0.9985, 0.00003),
             ufloat(0.999826, 0.0000006),
         ),
-        # TODO
-        "peak_counts": (1, 1),
+        "peak_counts": (23310, 16566),
+        "peak_counts_per_second": (194.25, 138.05),
     },
-    "22Na": {
-        "half_life": ufloat(2.6019, 0.00005),
-        "assay_date": datetime(2013, 1, 1),
-        "calibration_date": datetime.today(),
-        "initial_activity": ufloat(0.984, 0.05 * 0.984) * 1e-6 * 3.7e10,
-        "energies": (
-            511.0,
-            ufloat(1274.537, 0.0007),
-        ),
-        "intensities": (
-            ufloat(1.7991, 0.000018),
-            ufloat(0.99940, 0.0000014),
-        ),
-        # TODO
-        "peak_counts": (1, 1),
-    },
+    #    "133Ba": {
+    #        "half_life": ufloat(10.536, 0.0008),
+    #        "assay_date": datetime(2013, 1, 3),
+    #        "calibration_date": datetime.today(),
+    #        "initial_activity": 1 * 1e-6 * 3.7e10,
+    #        "energies": (
+    #            4.29,
+    #            30.625,
+    #            30.973,
+    #            ufloat(80.9979, 0.000011),
+    #            ufloat(302.8508, 0.00005),
+    #            ufloat(356.0129, 0.00007),
+    #        ),
+    #        "intensities": (
+    #            ufloat(0.157, 0.0008),
+    #            ufloat(0.339, 0.0001),
+    #            ufloat(0.622, 0.00018),
+    #            ufloat(0.329, 0.0003),
+    #            ufloat(0.1834, 0.000013),
+    #            0.6205,
+    #        ),
+    #        "peak_counts": (1,1,1,1,1,1),
+    #    },
+    #    "22Na": {
+    #        "half_life": ufloat(2.6019, 0.00005),
+    #        "assay_date": datetime(2013, 1, 1),
+    #        "calibration_date": datetime.today(),
+    #        "initial_activity": ufloat(0.984, 0.05 * 0.984) * 1e-6 * 3.7e10,
+    #        "energies": (
+    #            511.0,
+    #            ufloat(1274.537, 0.0007),
+    #        ),
+    #        "intensities": (
+    #            ufloat(1.7991, 0.000018),
+    #            ufloat(0.99940, 0.0000014),
+    #        ),
+    #        "peak_counts": (1,1),
+    #    },
 }
 
 all_energies = []
@@ -117,12 +120,12 @@ for isotope in check_source_properties.keys():
         ).days
         / 365
     )
-    for energy, intensity, count in zip(
+    for energy, intensity, counts_per_second in zip(
         check_source_properties[isotope]["energies"],
         check_source_properties[isotope]["intensities"],
-        check_source_properties[isotope]["peak_counts"],
+        check_source_properties[isotope]["peak_counts_per_second"],
     ):
-        efficiency = (count / live_time) / intensity / activity
+        efficiency = (counts_per_second) / intensity / activity
         all_efficiencies.append(efficiency)
         all_energies.append(energy)
 
@@ -168,15 +171,17 @@ def exp_log_poly(x, A, B, C, D):
         A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
     )
 
-popt, _ = scipy.optimize.curve_fit(
-    # exp_log_poly,
-    lambda x, A, B, C, D: np.exp(
-       A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
-    ),
-    #lambda x, A, B, C: A * x**2 + B * x + C,
-    xdata=scrub_uncertainties(all_energies),
-    ydata=scrub_uncertainties(all_efficiencies),
-)
+
+# fit = scipy.optimize.curve_fit(
+#    # exp_log_poly,
+#    lambda x, A, B, C, D: np.exp(
+#        A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
+#    ),
+#    xdata=scrub_uncertainties(all_energies),
+#    ydata=scrub_uncertainties(all_efficiencies),
+# )
+
+# print("exp-log-poly fit parameters:", fit)
 
 with open("efficiency_datapoints.json", "w") as file:
     json.dump(
@@ -185,8 +190,7 @@ with open("efficiency_datapoints.json", "w") as file:
             "efficiency": scrub_uncertainties(all_efficiencies),
             "energy_uncertainty": get_uncertainties(all_energies),
             "efficiency_uncertainty": get_uncertainties(all_efficiencies),
-            #"log_poly_fit_params": {'A': popt[0], 'B': popt[1], 'C': popt[2], 'D': popt[3]}
+            # "log_poly_fit_params": {'A': popt[0], 'B': popt[1], 'C': popt[2], 'D': popt[3]}
         },
         file,
     )
-
