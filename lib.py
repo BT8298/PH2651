@@ -1,18 +1,15 @@
 import csv
 import datetime
 import math
-
-import numpy
-import uncertainties.core
-
-from collections.abc import Sequence
 from dataclasses import dataclass, field
 from types import NoneType
 from typing import TextIO
-from numpy.typing import ArrayLike
+
+import numpy
+import uncertainties.core
 from numpy import ndarray
+from numpy.typing import ArrayLike
 from statsmodels.regression.linear_model import OLS
-from sympy import parse_expr, symbols, sqrt, Symbol, Expr
 from uncertainties import ufloat
 
 
@@ -210,34 +207,6 @@ class MysteryIsotopeMeasurements:
     )
 
 
-def propagate(f: str | Expr, vars: str | Sequence[str]):
-    """Calculate the expression for propagation of uncertainty.
-
-    Assumes that all variables are independent.
-
-    Args:
-        f: sympy expression for the function to propagate the uncertainty
-            through
-        vars: sympy-style variables declaration, for example "x y z" or
-            ("x", "y", "z")
-
-    Returns:
-        The quadrature sum of terms of the form (∂f/∂x)² sₓ², a common
-        approximation for the standard deviation of a function when the
-        variables are independent.
-    """
-    if not isinstance(f, Expr):
-        f = parse_expr(f)
-    syms = symbols(vars)
-    # if only one symbol is entered, syms is not iterable, so we make it
-    if isinstance(syms, Symbol):
-        syms = (syms,)
-    s_syms = symbols(["s_" + var for var in vars], positive=True)
-    return sqrt(
-        sum([f.diff(sym) ** 2 * s_sym**2 for sym, s_sym in zip(syms, s_syms)])
-    )
-
-
 def quadratic_regression(endog, exog):
     """Linear regression for the model Ax^2+Bx+C.
 
@@ -264,7 +233,7 @@ def calculate_radioactivity(
         t:
             Time elapsed in years.
     """
-    return a_0*math.exp(-(math.ln(2)/t_half)*t)
+    return a_0 * math.exp(-(math.ln(2) / t_half) * t)
 
 
 def parse_prospect_csv(
@@ -295,14 +264,14 @@ def parse_prospect_csv(
     )
     # two spaces after comma
     energy_calibration = []
-    for i, coef in enumerate(header[1].split(',  ')[-1].split(', ')):
-        energy_calibration.append(coef.split(', ')[-1])
+    for i, coef in enumerate(header[1].split(",  ")[-1].split(", ")):
+        energy_calibration.append(coef.split(", ")[-1])
     energy_calibration = tuple(energy_calibration)
-    live_time = float(header[2].split(', ')[-1])
-    real_time = float(header[3].split(', ')[-1])
+    live_time = float(header[2].split(", ")[-1])
+    real_time = float(header[3].split(", ")[-1])
 
     # 5% accuracy on live time correction per the datasheet
-    live_time = ufloat(live_time, 0.05*live_time)
+    live_time = ufloat(live_time, 0.05 * live_time)
 
     # at this point, spectrum file object is seeked to the header line
     # "Channel, Energy (keV), Counts"

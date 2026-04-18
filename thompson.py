@@ -3,23 +3,23 @@
 # import soerp3 # via second order error propagation theory
 # import mcerp3 # via Monte-Carlo something
 
-import math
 import itertools
+import math
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import scipy.constants as const
 import scipy.stats
 import statsmodels.stats.diagnostic
 import statsmodels.stats.stattools
+from uncertainties import ufloat, unumpy  # linear error propagation theory
 
 import lib
 
-from uncertainties import ufloat, unumpy  # linear error propagation theory
-
 # CODATA electron charge to mass ratio
-cmr_accepted_value = const.physical_constants["electron charge to mass quotient"]
+cmr_accepted_value = const.physical_constants[
+    "electron charge to mass quotient"
+]
 
 """
 width of front coil: 2.14 cm +- 0.02mm
@@ -47,7 +47,7 @@ all_data = lib.ChargeMassRatioMeasurements(
     # accel_voltage under the assumption that the external voltmeter is more
     # accurate. It shifts the mean observed closer to the accepted value.
     accel_voltage=ufloat(1.2, 0.05) * 1e3,  # kV to V
-    #accel_voltage=ufloat(1, 0.05) * 1e3,  # kV to V
+    # accel_voltage=ufloat(1, 0.05) * 1e3,  # kV to V
     deflection_plate_separation=ufloat(5.28, 0.05) * 1e-2,  # cm to m
     coil_turns=320,
     coil_radius=2 * arc / math.pi,
@@ -195,7 +195,8 @@ B_cmr_results = []
 for i, _ in enumerate(all_data.electric_field_trials):
     z_values = all_data.electric_field_trials[i].horizontal_beam_points
     y_values = [
-        y.nominal_value for y in all_data.electric_field_trials[i].vertical_beam_points
+        y.nominal_value
+        for y in all_data.electric_field_trials[i].vertical_beam_points
     ]
     fit = lib.quadratic_regression(y_values, z_values).fit()
     E_regressions.append(fit)
@@ -203,7 +204,8 @@ for i, _ in enumerate(all_data.electric_field_trials):
 for i, _ in enumerate(all_data.magnetic_field_trials):
     z_values = all_data.magnetic_field_trials[i].horizontal_beam_points
     y_values = [
-        y.nominal_value for y in all_data.magnetic_field_trials[i].vertical_beam_points
+        y.nominal_value
+        for y in all_data.magnetic_field_trials[i].vertical_beam_points
     ]
     fit = lib.quadratic_regression(y_values, z_values).fit()
     B_regressions.append(fit)
@@ -264,16 +266,25 @@ Statistics for regression models:
 
 # boxplot of e/m results
 
-plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({"font.size": 16})
 
-fig, ax = plt.subplots(layout='constrained')
-ax.boxplot(B_cmr_results_no_uncertainty, orientation="horizontal", positions=(0,), widths=(1,))
-ax.set_title('Distribution of Measured Electron Charge to Mass Quotients', loc='center', wrap=True)
-ax.set_xlabel('electron charge to mass quotient (C kg^-1)', wrap=True)
+fig, ax = plt.subplots(layout="constrained")
+ax.boxplot(
+    B_cmr_results_no_uncertainty,
+    orientation="horizontal",
+    positions=(0,),
+    widths=(1,),
+)
+ax.set_title(
+    "Distribution of Measured Electron Charge to Mass Quotients",
+    loc="center",
+    wrap=True,
+)
+ax.set_xlabel("electron charge to mass quotient (C kg^-1)", wrap=True)
 ax.set_frame_on(False)
 ax.set_yticks([])
 ax.set_ylim(-0.6, 0.6)
-ax.xaxis.set_units('C kg^-1')
+ax.xaxis.set_units("C kg^-1")
 fig.savefig("B_boxplot.svg")
 plt.close()
 
@@ -318,7 +329,7 @@ plt.savefig("B_all.svg")
 plt.close()
 
 # residual plots for each regression
-#for i, (run, fit) in enumerate(zip(all_data.magnetic_field_trials, B_regressions)):
+# for i, (run, fit) in enumerate(zip(all_data.magnetic_field_trials, B_regressions)):
 #    z_values = run.horizontal_beam_points
 #    plt.scatter(z_values, fit.resid)
 #    plt.title(f"Residual Plot for B Trial {i+1}")

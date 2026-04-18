@@ -1,17 +1,15 @@
-import scipy.optimize
-import scipy.signal
-from findpeaks import findpeaks
 import collections.abc
-import json
-import numpy as np
 import csv
-import uncertainties
-import matplotlib
-import matplotlib.pyplot as plt
-from uncertainties import ufloat
-import uncertainties.umath as umath
+import json
 from datetime import datetime
 from typing import TextIO
+
+import numpy as np
+import scipy.optimize
+import scipy.signal
+import uncertainties
+import uncertainties.umath as umath
+from uncertainties import ufloat
 
 # April 17th data
 # Cesium 137:
@@ -212,19 +210,19 @@ check_source_properties = {
 
 # TODO peak detection and background substraction
 
-with open('background.csv') as file:
+with open("background.csv") as file:
     background = parse_prospect_csv(file)[3]
-with open('mystery_120s.csv') as file:
+with open("mystery_120s.csv") as file:
     mystery = parse_prospect_csv(file)[3]
 
 # remove the background signal
-mystery['counts'] = mystery['counts'] - background['counts']
-#peaks, _ = scipy.signal.find_peaks(mystery['counts'], 100, 50)
-#peaks = findpeaks(method='topology').fit(mystery['counts'])['df']
+mystery["counts"] = mystery["counts"] - background["counts"]
+# peaks, _ = scipy.signal.find_peaks(mystery['counts'], 100, 50)
+# peaks = findpeaks(method='topology').fit(mystery['counts'])['df']
 
-#plt.bar(mystery['energies'], mystery['counts'], width=1)
-#plt.vlines(peaks, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
-#plt.savefig('hist.svg')
+# plt.bar(mystery['energies'], mystery['counts'], width=1)
+# plt.vlines(peaks, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
+# plt.savefig('hist.svg')
 
 all_energies = []
 all_intensities = []

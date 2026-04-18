@@ -2,14 +2,12 @@ import argparse
 import datetime
 import math
 
-import lib
-
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize
+from uncertainties import ufloat
 
-from uncertainties import ufloat, unumpy
+import lib
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -31,7 +29,7 @@ if __name__ == "__main__":
         half_life=ufloat(30.007, 0.00046),
         assay_date=datetime.datetime(1995, 10, 13),
         record_date=datetime.datetime.today(),
-        initial_activity=ufloat(1, 0.20*1),
+        initial_activity=ufloat(1, 0.20 * 1),
         characteristic_gammas=(
             lib.CharacteristicGamma(
                 # convert to eV
@@ -46,7 +44,7 @@ if __name__ == "__main__":
         half_life=ufloat(10.536, 0.0008),
         assay_date=datetime.datetime(2013, 1, 3),
         record_date=datetime.datetime.today(),
-        initial_activity=ufloat(0.988, 0.05*0.988),
+        initial_activity=ufloat(0.988, 0.05 * 0.988),
         characteristic_gammas=(
             lib.CharacteristicGamma(
                 energy=ufloat(275.925, 0.0007) * 1000,
@@ -198,12 +196,19 @@ if __name__ == "__main__":
     # we do not transform it into a linear model by the natural logarithm
     def exp_log_poly(A, B, C, D, x):
         return math.exp(
-            A + B * math.log(x) + C * (math.log(x)) ** 2 + D * (math.log(x)) ** 3
+            A
+            + B * math.log(x)
+            + C * (math.log(x)) ** 2
+            + D * (math.log(x)) ** 3
         )
 
     # x: energies in keV
     # y: efficiency counts/photon
-    efficiency_fit_params, efficiency_fit_cov = scipy.optimize.curve_fit(exp_log_poly, [point[0].nominal_value for point in efficiencies], [point[1].nominal_value for point in efficiencies])
+    efficiency_fit_params, efficiency_fit_cov = scipy.optimize.curve_fit(
+        exp_log_poly,
+        [point[0].nominal_value for point in efficiencies],
+        [point[1].nominal_value for point in efficiencies],
+    )
 
     if argns.generate_plots:
         # TODO extend to all PHAs, not just the first
@@ -233,8 +238,19 @@ if __name__ == "__main__":
         plt.close()
 
         fig, ax = plt.subplots()
-        plt.plot([point[0].nominal_value for point in efficiencies], [point[1].nominal_value for point in efficiencies])
+        plt.plot(
+            [point[0].nominal_value for point in efficiencies],
+            [point[1].nominal_value for point in efficiencies],
+        )
         sample_pts = np.linspace(0, 1500, 100)
-        fit_y_values = exp_log_poly(efficiency_fit_params[0], efficiency_fit_params[1], efficiency_fit_params[2], efficiency_fit_params[3], sample_pts)
-        plt.plot([point[0].nominal_value for point in efficiencies], fit_y_values)
+        fit_y_values = exp_log_poly(
+            efficiency_fit_params[0],
+            efficiency_fit_params[1],
+            efficiency_fit_params[2],
+            efficiency_fit_params[3],
+            sample_pts,
+        )
+        plt.plot(
+            [point[0].nominal_value for point in efficiencies], fit_y_values
+        )
         plt.show()
