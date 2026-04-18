@@ -3,6 +3,7 @@ name = "ph2651-analysis"
 version = "0.0.1"
 description = "Data analysis programs for PH2651: Intermediate Physics Laboratory"
 dependencies = [
+    "findpeaks>=2.7.5",
     "matplotlib>=3.10.8",
     "numpy>=2.4.4",
     "scipy>=1.17.1",
