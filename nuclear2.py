@@ -1,6 +1,7 @@
 import collections.abc
 import csv
 import json
+import logging
 from datetime import datetime
 from typing import TextIO
 
@@ -9,7 +10,11 @@ import scipy.optimize
 import scipy.signal
 import uncertainties
 import uncertainties.umath as umath
+from findpeaks import findpeaks
 from uncertainties import ufloat
+
+# squelch findpeaks logger messages
+logging.getLogger('findpeaks').setLevel(logging.CRITICAL + 1)
 
 # April 17th data
 # Cesium 137:
@@ -41,7 +46,7 @@ coarse_gain = 2.0
 
 
 def parse_prospect_csv(file: TextIO):
-    """
+    """Get the data from the ProSpect CSV file.
 
     Args:
         file:
@@ -49,8 +54,8 @@ def parse_prospect_csv(file: TextIO):
 
     Returns:
         The start time, real time, live time, and spectrum data dictionary in
-        that order. The dictionary has the following keys: 'channel', 'energy',
-        'count'.
+        that order. The dictionary has the following keys: 'channels', 'energies',
+        'counts'.
     """
     # consume the header lines before invoking the csv reader
     header = []
@@ -88,6 +93,9 @@ def parse_prospect_csv(file: TextIO):
     spectrum_data["channels"] = np.array(spectrum_data["channels"])  # ty: ignore[invalid-assignment]
     spectrum_data["energies"] = np.array(spectrum_data["energies"])  # ty: ignore[invalid-assignment]
     spectrum_data["counts"] = np.array(spectrum_data["counts"])  # ty: ignore[invalid-assignment]
+#    spectrum_data["channels"] = spectrum_data["channels"]  # ty: ignore[invalid-assignment]
+#    spectrum_data["energies"] = spectrum_data["energies"]  # ty: ignore[invalid-assignment]
+#    spectrum_data["counts"] = spectrum_data["counts"]  # ty: ignore[invalid-assignment]
 
     return start_time, real_time, live_time, spectrum_data
 
@@ -210,19 +218,40 @@ check_source_properties = {
 
 # TODO peak detection and background substraction
 
-with open("background.csv") as file:
-    background = parse_prospect_csv(file)[3]
-with open("mystery_120s.csv") as file:
-    mystery = parse_prospect_csv(file)[3]
+with open("background.csv") as bg, open("cs137_120s.csv") as cs, open("mystery_120s.csv") as mst:
+    background = parse_prospect_csv(bg)[3]
+    cesium = parse_prospect_csv(cs)[3]
+    mystery = parse_prospect_csv(mst)[3]
 
 # remove the background signal
-mystery["counts"] = mystery["counts"] - background["counts"]
+#mystery["counts"] = mystery["counts"] - background["counts"]
+mystery['counts'] = [ mystery_count - background_count for mystery_count, background_count in zip(mystery['counts'], background['counts']) ]
 # peaks, _ = scipy.signal.find_peaks(mystery['counts'], 100, 50)
-# peaks = findpeaks(method='topology').fit(mystery['counts'])['df']
+fp = findpeaks(method='topology', limit=80)
+#fp2 = findpeaks(method='peakdetect')
+#fp2.fit(mystery['counts'])
+peakinfo_df = fp.fit(mystery['counts'])['df']
+peakinfo_df = peakinfo_df.where(peakinfo_df.peak).dropna()
+peak_energies = [mystery['energies'][int(index)] for index in peakinfo_df['x']]
+peak_counts = peakinfo_df['y'].values
+#peak_counts = peakinfo_df['y'].values.tolist()
+print(f"found {len(peak_counts)} peaks:")
+for e, c in zip(peak_energies, peak_counts):
+    print(e, c, sep=', ')
+#breakpoint()
+# TODO something shifts the spectrum back to zero
+#fp.plot()
+#fp2.plot()
 
-# plt.bar(mystery['energies'], mystery['counts'], width=1)
-# plt.vlines(peaks, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
-# plt.savefig('hist.svg')
+#with open("background.json", "w") as bg, open("cs137.json", "w") as cs, open('mystery.json', 'w') as mst:
+#    json.dump({'data': background}, bg)
+#    json.dump({'data': cesium}, cs)
+#    json.dump({'data': mystery, 'peak_energies': peak_energies, 'peak_counts': peak_counts}, mst)
+
+
+#plt.bar(mystery['energies'], mystery['counts'], width=1)
+#plt.vlines(peak_energies, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
+#plt.savefig('hist.svg')
 
 all_energies = []
 all_intensities = []
@@ -273,9 +302,9 @@ popt, _ = scipy.optimize.curve_fit(
     absolute_sigma=True,
 )
 
-print("exp-log-poly fit parameters:", popt)
+print("exp-log-poly fit parameters (A B C D):", popt)
 
-with open("efficiency_datapoints.json", "w") as file:
+with open("efficiency.json", "w") as file:
     json.dump(
         {
             "energy": scrub_uncertainties(all_energies),
