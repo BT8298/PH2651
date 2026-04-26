@@ -14,7 +14,7 @@ from findpeaks import findpeaks
 from uncertainties import ufloat
 
 # squelch findpeaks logger messages
-logging.getLogger('findpeaks').setLevel(logging.CRITICAL + 1)
+logging.getLogger("findpeaks").setLevel(logging.CRITICAL + 1)
 
 # April 17th data
 # Cesium 137:
@@ -93,9 +93,9 @@ def parse_prospect_csv(file: TextIO):
     spectrum_data["channels"] = np.array(spectrum_data["channels"])  # ty: ignore[invalid-assignment]
     spectrum_data["energies"] = np.array(spectrum_data["energies"])  # ty: ignore[invalid-assignment]
     spectrum_data["counts"] = np.array(spectrum_data["counts"])  # ty: ignore[invalid-assignment]
-#    spectrum_data["channels"] = spectrum_data["channels"]  # ty: ignore[invalid-assignment]
-#    spectrum_data["energies"] = spectrum_data["energies"]  # ty: ignore[invalid-assignment]
-#    spectrum_data["counts"] = spectrum_data["counts"]  # ty: ignore[invalid-assignment]
+    #    spectrum_data["channels"] = spectrum_data["channels"]  # ty: ignore[invalid-assignment]
+    #    spectrum_data["energies"] = spectrum_data["energies"]  # ty: ignore[invalid-assignment]
+    #    spectrum_data["counts"] = spectrum_data["counts"]  # ty: ignore[invalid-assignment]
 
     return start_time, real_time, live_time, spectrum_data
 
@@ -218,40 +218,49 @@ check_source_properties = {
 
 # TODO peak detection and background substraction
 
-with open("background.csv") as bg, open("cs137_120s.csv") as cs, open("mystery_120s.csv") as mst:
+with (
+    open("background.csv") as bg,
+    open("cs137_120s.csv") as cs,
+    open("mystery_120s.csv") as mst,
+):
     background = parse_prospect_csv(bg)[3]
     cesium = parse_prospect_csv(cs)[3]
     mystery = parse_prospect_csv(mst)[3]
 
 # remove the background signal
-#mystery["counts"] = mystery["counts"] - background["counts"]
-mystery['counts'] = [ mystery_count - background_count for mystery_count, background_count in zip(mystery['counts'], background['counts']) ]
+# mystery["counts"] = mystery["counts"] - background["counts"]
+mystery["counts"] = [
+    mystery_count - background_count
+    for mystery_count, background_count in zip(
+        mystery["counts"], background["counts"]
+    )
+]
 # peaks, _ = scipy.signal.find_peaks(mystery['counts'], 100, 50)
-fp = findpeaks(method='topology', limit=80)
-#fp2 = findpeaks(method='peakdetect')
-#fp2.fit(mystery['counts'])
-peakinfo_df = fp.fit(mystery['counts'])['df']
+fp = findpeaks(method="topology", limit=80)
+# fp2 = findpeaks(method='peakdetect')
+# fp2.fit(mystery['counts'])
+peakinfo_df = fp.fit(mystery["counts"])["df"]
 peakinfo_df = peakinfo_df.where(peakinfo_df.peak).dropna()
-peak_energies = [mystery['energies'][int(index)] for index in peakinfo_df['x']]
-peak_counts = peakinfo_df['y'].values
-#peak_counts = peakinfo_df['y'].values.tolist()
+peak_energies = [mystery["energies"][int(index)] for index in peakinfo_df["x"]]
+peak_counts = peakinfo_df["y"].values
+# peak_counts = peakinfo_df['y'].values.tolist()
 print(f"found {len(peak_counts)} peaks:")
 for e, c in zip(peak_energies, peak_counts):
-    print(e, c, sep=', ')
-#breakpoint()
+    print(e, c, sep=", ")
+# breakpoint()
 # TODO something shifts the spectrum back to zero
-#fp.plot()
-#fp2.plot()
+# fp.plot()
+# fp2.plot()
 
-#with open("background.json", "w") as bg, open("cs137.json", "w") as cs, open('mystery.json', 'w') as mst:
+# with open("background.json", "w") as bg, open("cs137.json", "w") as cs, open('mystery.json', 'w') as mst:
 #    json.dump({'data': background}, bg)
 #    json.dump({'data': cesium}, cs)
 #    json.dump({'data': mystery, 'peak_energies': peak_energies, 'peak_counts': peak_counts}, mst)
 
 
-#plt.bar(mystery['energies'], mystery['counts'], width=1)
-#plt.vlines(peak_energies, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
-#plt.savefig('hist.svg')
+# plt.bar(mystery['energies'], mystery['counts'], width=1)
+# plt.vlines(peak_energies, 0, 1000, colors='black', linestyles='dashed', linewidths=0.05)
+# plt.savefig('hist.svg')
 
 all_energies = []
 all_intensities = []
@@ -290,10 +299,10 @@ def exp_log_poly(x, A, B, C, D):
 
 
 popt, _ = scipy.optimize.curve_fit(
-    # exp_log_poly,
-    lambda x, A, B, C, D: np.exp(
-        A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
-    ),
+    exp_log_poly,
+    # lambda x, A, B, C, D: np.exp(
+    #    A + B * np.log(x) + C * (np.log(x)) ** 2 + D * (np.log(x)) ** 3
+    # ),
     # scale the energies down by 1000 so the curve fit algorithm converges (were in keV, now in eV×10⁻⁶; MeV)
     xdata=np.array(scrub_uncertainties(all_energies)) / 1000,
     ydata=scrub_uncertainties(all_efficiencies),
@@ -302,7 +311,50 @@ popt, _ = scipy.optimize.curve_fit(
     absolute_sigma=True,
 )
 
+# the 78.92 peak is channel 122 (0-based indexing)
+barium_sample_obs = []
+mystery["energies"][122]
+# crop to 15 channels left and right of the detected peak
+for i in range(-15, 16):
+    energy = mystery["energies"][122 + i]
+    nobs = mystery["counts"][122 + i]
+    # duplicate energies by the number of counts
+    barium_sample_obs.extend([energy] * nobs)
+ttest_barium = scipy.stats.ttest_1samp(
+    barium_sample_obs, 80.9979, alternative="two-sided"
+)
+
+print("efficiency curve statistics")
+print("---------------------------")
 print("exp-log-poly fit parameters (A B C D):", popt)
+print(
+    "statistical tests on hypothesized Barium 133 80.9979 keV gamma (78.92 keV in the data)"
+)
+print(
+    "--------------------------------------------------------------------------------------"
+)
+print("summary statistics", scipy.stats.describe(barium_sample_obs))
+print(
+    "t-test on 78.92 keV peak:",
+    scipy.stats.ttest_1samp(
+        barium_sample_obs, 80.9979, alternative="two-sided"
+    ),
+)
+print(
+    "shapiro-wilk test around 78.92 keV peak:",
+    scipy.stats.shapiro(barium_sample_obs),
+)
+# in microcuries
+#   361.11 keV, 477.31±2.8 counts/second
+print(
+    "activity of Barium 133",
+    ufloat(477.31, 2.8)
+    / 0.6205
+    / exp_log_poly(356.0129 / 1000, *popt)
+    * 2.703e-11
+    * 1e6,
+    "microcuries",
+)
 
 with open("efficiency.json", "w") as file:
     json.dump(
