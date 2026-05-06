@@ -18,6 +18,8 @@ class DefaultTemplate(Scene):
 
 
 latex_preamble = r"""\usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows}
 \DeclarePairedDelimiter\bra{\langle}{\rvert}
 \DeclarePairedDelimiter\ket{\lvert}{\rangle}
 \DeclarePairedDelimiterX\braket[2]{\langle}{\rangle}{#1\,\delimsize\vert\,\mathopen{}#2}"""
@@ -96,34 +98,60 @@ class ConstructionOfMOperators(Scene):
 
 class EveDetectionProbability(Scene):
     def construct(self):
-        chart_title = SurroundingRectangle(
-            Text("Eve's decision tree", font_size=12)
-        )
-        # undetected, 50%
-        right_basis = Text(
-            "Choose the same basis as Alice and Bob", font_size=12
-        )
-        # 50%
-        wrong_basis = Text(
-            "Choose a different basis than Alice and Bob", font_size=12
-        )
-        # undetected, 50%
-        right_bit = Text(
-            "Bob measures the same bit that Alice sent", font_size=12
-        )
-        # detected, 50%
-        wrong_bit = Text(
-            "Bob measures a different bit than Alice sent", font_size=12
+        flowchart = Tex(
+            r"""
+            \tikzstyle{line} = [draw,-latex]
+            \begin{tikzpicture}[node distance=30mm]
+                \node (title) {Eve's chances};
+                \node (right_basis) [below right of=title,align=right,text width=3cm] {Choose the same basis as Alice and Bob};
+                \node (wrong_basis) [below left of=title,align=left,text width=3cm] {Choose a different basis that Alice and Bob};
+                \node (right_bit) [below right of=wrong_basis,align=right,text width=3cm] {Bob measures the same bit that Alice sent};
+                \node (wrong_bit) [below left of=wrong_basis,align=left,text width=3cm] {Bob measures a different bit than Alice sent};
+                \path [line] (title) -- node[anchor=south west] {$p=\frac 1 2$} (right_basis);
+                \path [line,red] (title) -- node[anchor=south east] {$p=\frac 1 2$} (wrong_basis);
+                \path [line] (wrong_basis) -- node[anchor=south west] {$p=\frac 1 2$} (right_bit);
+                \path [line,red] (wrong_basis) -- node[anchor=south east] {$p=\frac 1 2$} (wrong_bit);
+            \end{tikzpicture}
+            """,
+            tex_template=myTemplate,
         )
 
-        top_text = Text("Hello I am on the top")
-        top_text.to_edge(UP)
+        self.add(flowchart)
+        # chart_title = Text("Eve's decision tree", font_size=12)
+        # chart_title_outline = SurroundingRectangle(chart_title)
+        ## undetected, 50%
+        # decisions = VGroup(*[
 
-        chart_title.to_edge(UP)
-        right_basis.align_to(chart_title, DR)
-        wrong_basis.align_to(chart_title, DL)
-        right_bit.align_to(wrong_basis, DR)
-        wrong_bit.align_to(wrong_basis, DL)
+        #    ])
+        # right_basis = Text(
+        #    "Choose the same basis as Alice and Bob", font_size=12
+        # )
+        ## 50%
+        # wrong_basis = Text(
+        #    "Choose a different basis than Alice and Bob", font_size=12
+        # )
+        ## undetected, 50%
+        # right_bit = Text(
+        #    "Bob measures the same bit that Alice sent", font_size=12
+        # )
+        ## detected, 50%
+        # wrong_bit = Text(
+        #    "Bob measures a different bit than Alice sent", font_size=12
+        # )
 
-        self.add(top_text)
+        # chart_title.to_edge(UP)
+        # right_basis.align_to(chart_title, DR)
+        # wrong_basis.align_to(chart_title, DL)
+        # right_bit.align_to(wrong_basis, DR)
+        # wrong_bit.align_to(wrong_basis, DL)
+
+        # self.play(
+        #    FadeIn(chart_title),
+        #    FadeIn(chart_title_outline),
+        # )
+        # self.wait()
+        # self.play(
+        #    FadeIn(right_basis),
+        #    FadeIn(wrong_basis),
+        # )
 
