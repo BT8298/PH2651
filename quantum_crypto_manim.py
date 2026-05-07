@@ -156,8 +156,8 @@ class ConstructionOfMOperators(Scene):
 
 class BulkObservation(Scene):
     def construct(self):
-        z = MathTex(r"\ket{0}", tex_template=myTemplate)
-        p = MathTex(r"\ket{\pi}", tex_template=myTemplate)
+        z = MathTex(r"(-1)\ket{0}", tex_template=myTemplate)
+        p = MathTex(r"(+1)\ket{\pi}", tex_template=myTemplate)
         states = VGroup(
             *[
                 MathTex(
@@ -211,8 +211,8 @@ class EveDetectionProbability(Scene):
         #    stroke_width=1
         # )
 
-        wrong_basis = Text("Choose different basis than Alice")
-        wrong_bit = Text("Bob reads different bit than Alice")
+        wrong_basis = Text("Choose different basis than Alice and Bob")
+        wrong_bit = Text("Happen to measure the wrong bit")
         detected = Text("Eve is detected")
         detection_probability = Text("Detection probability:")
 
@@ -237,10 +237,14 @@ class EveDetectionProbability(Scene):
         p3.next_to(detection_probability, RIGHT)
 
         self.play(FadeIn(wrong_basis))
+        self.wait()
         self.play(FadeIn(wrong_bit), Write(arr1))
+        self.wait()
         self.play(FadeIn(detected), Write(arr2))
+        self.wait()
         self.play(Write(p1))
         self.play(Write(p2))
+        self.wait()
         self.play(FadeIn(detection_probability))
         self.play(Write(p3))
         self.wait(3)
