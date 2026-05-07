@@ -19,3 +19,10 @@ line-length = 80
 extend-select = ["I001", "I002"]
 [tool.ruff.lint.per-file-ignores]
 "quantum_crypto_manim.py" = ["F403", "F405"]
+[[tool.ty.overrides]]
+include = ["quantum_crypto_manim.py"]
+[tool.ty.overrides.rules]
+possibly-unresolved-reference = "ignore"
+unresolved-reference = "ignore"
+[tool.ty.overrides.analysis]
+allowed-unresolved-imports = ["manim"]
