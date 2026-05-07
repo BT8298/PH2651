@@ -1,4 +1,5 @@
 import random
+import itertools
 from manim import *
 
 latex_preamble = r"""\usepackage{mathtools}
@@ -33,21 +34,21 @@ class DefinitionOfMOperators(Scene):
         )
         times_basis_definition = MathTex(
             r"""
-            \ket{-\frac \pi 2} &= \frac{1}{\sqrt{2}} \ket{0} - \frac{1}{\sqrt{2}} \ket{\pi} \\
-            \ket{\frac \pi 2} &= \frac{1}{\sqrt{2}} \ket{0} + \frac{1}{\sqrt{2}} \ket{\pi}
+            \left\lvert {-\frac \pi 2} \right\rangle &= \frac{1}{\sqrt{2}} \ket{0} - \frac{1}{\sqrt{2}} \ket{\pi} \\
+            \left\lvert {\frac \pi 2} \right\rangle &= \frac{1}{\sqrt{2}} \ket{0} + \frac{1}{\sqrt{2}} \ket{\pi}
             """,
             tex_template=myTemplate,
         )
         m_times_eigenvectors = MathTex(
             r"""
-            M_\times \ket{-\frac \pi 2} &= -\ket{-\frac \pi 2} \\
-            M_\times \ket{\frac \pi 2} &= \ket{\frac \pi 2} \\
+            M_\times \left\lvert {-\frac \pi 2} \right\rangle &= -\left\lvert {-\frac \pi 2} \right\rangle \\
+            M_\times \left\lvert {\frac \pi 2} \right\rangle &= \left\lvert {\frac \pi 2} \right\rangle \\
             """,
             tex_template=myTemplate,
         )
         times_basis = MathTex(
             r"""
-            \mathcal{B}_\times &= \{\ket{-\frac \pi 2}, \ket{\frac \pi 2}\} \\
+            \mathcal{B}_\times &= \left\{\left\lvert {-\frac \pi 2} \right\rangle, \left\lvert {\frac \pi 2} \right\rangle \right\} \\
             """,
             # \braket{-\frac \pi 2}{\frac \pi 2} &= 0 \\
             # \braket{-\frac \pi 2}{-\frac \pi 2} &= 1 \\
@@ -98,23 +99,46 @@ class ConstructionOfMOperators(Scene):
             """,
             tex_template=myTemplate,
         )
+        linearity_steps = [
+            MathTex(
+                r"(\ket{\pi}\bra{\pi} - \ket{0}\bra{0}) (\alpha\ket{a} + \beta\ket{b})",
+                tex_template=myTemplate,
+            ),
+            MathTex(
+                r"(\ket{\pi}\bra{\pi})\alpha\ket{a} + (\ket{\pi}\bra{\pi})\beta\ket{b} - (\ket{0}\bra{0})\alpha\ket{a} - (\ket{0}\bra{0})\beta\ket{b}",
+                tex_template=myTemplate,
+            ),
+            MathTex(
+                r"(\ket{\pi}\bra{\pi} - \ket{0}\bra{0}) \alpha\ket{a} + (\ket{\pi}\bra{\pi} - \ket{0}\bra{0}) \beta\ket{b}",
+                tex_template=myTemplate,
+            ),
+        ]
         m_times_operator = MathTex(
-            r"M_\times = \ket{\frac \pi 2}\bra{\frac \pi 2} - \ket{-\frac \pi 2}\bra{-\frac \pi 2}",
+            r"M_\times = \left\lvert {\frac \pi 2} \right\rangle \left\langle {\frac \pi 2} \right\lvert - \left\lvert {-\frac \pi 2} \right\rangle \left\langle {-\frac \pi 2} \right\lvert",
             tex_template=myTemplate,
         )
 
         self.play(Write(m_plus_operator))
+        self.wait(3)
         self.play(m_plus_operator.animate.to_corner(UL))
         self.play(FadeIn(plugging_into_m_plus))
+        self.wait(3)
         self.play(FadeOut(plugging_into_m_plus))
-        self.play(FadeIn(linearity_of_m_plus))
-        self.play(FadeOut(linearity_of_m_plus))
+        for step, nextstep in itertools.pairwise(linearity_steps):
+            nextstep.next_to(step, DOWN)
+            self.play(FadeIn(step))
+        self.play(FadeIn(linearity_steps[-1]))
+        # self.play(FadeIn(linearity_of_m_plus))
+        self.wait(3)
+        self.play(*[FadeOut(step) for step in linearity_steps])
+        # self.play(FadeOut(linearity_of_m_plus))
         m_times_operator.next_to(m_plus_operator, DOWN)
         m_times_operator.to_edge(LEFT)
         self.play(Write(m_times_operator))
         self.wait(3)
 
-#class Observation(Scene):
+
+# class Observation(Scene):
 #    def construct(self):
 #        al = Text('Alice uses + basis to send')
 #        pi = MathTex(r'\ket{\pi}')
@@ -126,8 +150,9 @@ class ConstructionOfMOperators(Scene):
 #
 #        pi.next_to(al, RIGHT)
 
-class Observation(Scene):
-    
+# class Observation(Scene):
+#    pass
+
 
 class BulkObservation(Scene):
     def construct(self):
@@ -151,9 +176,13 @@ class BulkObservation(Scene):
         ]
 
         self.play(FadeIn(states))
+        self.wait(3)
         self.play(
             *[
-                Transform(state, collapsed_state) for state, collapsed_state in zip(states.submobjects, collapsed_states)
+                Transform(state, collapsed_state)
+                for state, collapsed_state in zip(
+                    states.submobjects, collapsed_states
+                )
             ]
         )
         self.wait(3)
